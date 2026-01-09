@@ -1,0 +1,53 @@
+
+{% load static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="{% static 'reviews/css/site.css' %}">
+  <title>Reviews</title>
+</head>
+<body>
+  <header class="header">
+    <div>Signed in as: <strong>{{ request.user.username }}</strong></div>
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+      <button class="btn danger">Logout</button>
+    </form>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Write a review</h2>
+      <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn primary">Submit</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>All reviews</h2>
+      <div class="list">
+        {% for r in reviews %}
+          <div class="review {% if r.sentiment %}pos{% else %}neg{% endif %}">
+            <div class="meta">
+              <span>{{ r.user.username }}</span>
+              <span>{{ r.created_at|date:"Y-m-d H:i" }}</span>
+              <span class="badge">{% if r.sentiment %}positive{% else %}negative{% endif %}</span>
+            </div>
+            <p class="text">{{ r.text }}</p>
+            <div class="actions">
+              <a class="btn secondary" href="{% url 'edit' r.pk %}">Edit</a>
+              <form method="post" action="{% url 'delete' r.pk %}" style="display:inline">{% csrf_token %}
+                <button class="btn danger">Delete</button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <p>No reviews yet.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

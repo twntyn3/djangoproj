@@ -1,0 +1,243 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Music</title>
+
+  <!-- Bootstrap (адаптив + красиво сразу) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    html { scroll-behavior: smooth; }
+
+
+:root { --pos:#2ecc71; --neg:#e32636; --bg:#f6f7f9; --ink:#111; --muted:#6b7280; --card:#fff; --accent:#2563eb;}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+.header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.container{max-width:900px;margin:24px auto;padding:0 16px;display:grid;gap:16px;grid-template-columns:1fr}
+.container.narrow{max-width:520px}
+.card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.list{display:grid;gap:12px}
+.review{border-left:6px solid;padding:12px;border-radius:10px;background:#fafafa}
+.review.pos{border-color:var(--pos)}
+.review.neg{border-color:var(--neg)}
+.meta{display:flex;gap:10px;align-items:center;opacity:.8;font-size:14px;margin-bottom:6px;color:var(--muted)}
+.badge{border:1px solid #e5e7eb;border-radius:999px;padding:2px 8px;font-size:12px}
+.text{white-space:pre-wrap;line-height:1.5}
+.btn{border:none;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.secondary{background:#e9eef5}
+.btn.danger{background:var(--neg);color:#fff}
+form{margin:0}
+/* Шапка-обёртка: без полоски на всю ширину */
+.top-banner{
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 18px 0;
+    background: transparent; /* важно: убираем “полоску” */
+  }
+  
+  /* Карточка как на втором скрине */
+  .banner-card{
+    max-width: 1100px;
+    margin: 0 auto;
+  
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 34px;
+  
+    padding: 22px 20px;
+    box-shadow: 0 18px 60px rgba(0,0,0,.28);
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Большая красивая надпись */
+  .banner-text{
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+  
+    font-size: clamp(24px, 3.6vw, 46px);
+    line-height: 1.12;
+  
+    color: rgba(255,255,255,.98);
+    text-shadow: 0 10px 28px rgba(0,0,0,.22);
+  }
+  
+
+    /* РОЗОВЫЙ ФОН НА ВСЮ СТРАНИЦУ */
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #ffb3d9 0%, #ff5fa2 35%, #b4005a 100%);
+      color: #ffffff;
+    }
+
+    .hero {
+      min-height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 56px 16px;
+    }
+
+    .section { padding: 56px 0; }
+
+    .glass {
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.25);
+      backdrop-filter: blur(8px);
+    }
+
+    .photo {
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,.28);
+    }
+
+    .lyrics {
+      font-size: 1.08rem;
+      line-height: 1.8;
+    }
+
+    .letter {
+      white-space: pre-wrap;
+      font-size: 1.05rem;
+      line-height: 1.85;
+    }
+
+    /* Оверлей для старта музыки (из-за ограничений браузеров) */
+    #startOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, rgba(255,255,255,.16), rgba(0,0,0,.72));
+      backdrop-filter: blur(7px);
+      padding: 24px;
+    }
+  </style>
+</head>
+
+<body>
+
+    <header class="top-banner">
+        <div class="container">
+          <div class="banner-card">
+            <div class="banner-text">С Новым Годом и Рождеством, Сюшечка!</div>
+          </div>
+        </div>
+      </header>
+      
+
+
+  <!-- Аудио (если ты переименовал mp3 в song.mp3 — так и оставляй) -->
+  <audio id="bgAudio" preload="auto" loop playsinline>
+    <source src="{% static 'reviews/audio/song.mp3' %}" type="audio/mpeg">
+  </audio>
+
+  <!-- Оверлей старт -->
+  <div id="startOverlay">
+    <div class="glass text-center" style="max-width: 720px; width: 100%;">
+      <h1 class="display-6 mb-3">Нажми “Начать”</h1>
+      <p class="mb-4 opacity-75">
+        Музыка включится после первого нажатия 
+      </p>
+      <button id="startBtn" type="button" class="btn btn-lg btn-light px-4">Начать ▶</button>
+      <div id="startHint" class="mt-3 small opacity-75"></div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="glass">
+      <h2 class="mb-3">Вот такой вот маленький подарочек тебе приготовил</h2>
+      <p class="mb-0 opacity-75">Листай вниз — эта страница - небольшое напоминание, о том,что я тебя люблю</p>
+    </div>
+  </header>
+
+  <!-- 30 фото + текст между каждым (через цикл) -->
+  <section class="section">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        {% for s in sections %}
+          <div class="col-12">
+            <div class="photo">
+              <img class="img-fluid" src="{% static s.img %}" alt="Фото {{ s.num }}">
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="glass">
+              <div class="lyrics">
+                {{ s.text|linebreaksbr }}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Письмо в конце -->
+  <section class="section">
+    <div class="container">
+      <div class="glass">
+        <h3 class="mb-3">Письмо</h3>
+        <div class="letter">Привет!
+Заинька, не получилось подарить тебе эту штучку в нормальных теплых отношениях, но в любом случае не могу тебе это не показать
+Прости меня за то, что не можешь быть со мной в нормальных счастливых отношениях, это полностью моя вина.
+Я буду очень скучать по тому, что было и что могло бы у нас быть. Надеюсь ты сможешь меня простить за все это.
+Надесюь ты не будешь меня бояться и переживать, и если уже мне совсем повезет, то надеюсь ты сможешь дать мне реальный шанс быть рядом с тобой, как твой парень и может быть муж.
+
+Очень сильно тебя люблю, люблю до безумия!
+С любовью, твой Тюшечка</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-5 text-center opacity-75">
+    <small>©</small>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const audio = document.getElementById('bgAudio');
+      const overlay = document.getElementById('startOverlay');
+      const btn = document.getElementById('startBtn');
+      const hint = document.getElementById('startHint');
+
+      async function start(e) {
+        if (e) e.preventDefault();
+
+        try {
+          audio.volume = 0.9;
+          await audio.play();
+          overlay.style.display = 'none';
+        } catch (err) {
+          hint.textContent = "Не удалось включить звук. Проверь, что mp3 доступен и нажми ещё раз.";
+          console.error(err);
+        }
+      }
+
+      btn.addEventListener('click', start);
+
+      // На всякий случай: тап по фону оверлея тоже запускает
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) start(e);
+      });
+    });
+  </script>
+</body>
+</html>
